@@ -6,3 +6,4 @@ sample.elf
 shellcode.elf
 *.elf
 *.bin
+venv/
