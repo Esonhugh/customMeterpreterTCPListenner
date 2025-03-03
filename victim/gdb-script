@@ -1,0 +1,7 @@
+file ./victim.elf
+
+// stage1 shellcode start
+b *(&buf)
+// stage1 shellcode last instruction
+b *((void *)(&buf)+128)
+r
