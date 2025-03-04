@@ -4,4 +4,7 @@ GOFLAGGER=-ldflags '-extldflags "-static -fPIC" -linkmode=external -s -w' -build
 GOENVS=CC=musl-gcc GOOS=linux GOARCH=amd64 CGO_ENABLED=1 # CGO_LDFLAGS="-static"
 
 build:
+	go build -o shellcode.elf ./main.go && file shellcode.elf
+
+build-pie-maybe:
 	$(GOENVS) go build $(GOFLAGGER) -o shellcode.elf ./main.go && file shellcode.elf
